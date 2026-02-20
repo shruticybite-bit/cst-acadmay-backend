@@ -180,4 +180,111 @@ router.get("/articles", async (req, res) => {
   const articles = await Service.find({ type: "article" });
   res.json(articles);
 });
+/* ===============================
+   GET SERVICE BY SLUG
+================================ */
+router.get("/detail/:slug", async (req, res) => {
+  try {
+    const service = await Service.findOne({
+      slug: req.params.slug
+    });
+
+    if (!service) {
+      return res.status(404).json({
+        success: false,
+        message: "Service not found"
+      });
+    }
+
+    res.json({
+      success: true,
+      data: service
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+});
+/* ===============================
+   GET SAME TYPE + CATEGORY LIST
+================================ */
+router.get("/by-type-category", async (req, res) => {
+  try {
+    const { type, category } = req.query;
+
+    if (!type || !category) {
+      return res.status(400).json({
+        success: false,
+        message: "Type and category are required"
+      });
+    }
+
+    const services = await Service.find({
+      type,
+      category
+    })
+    .select("title excerpt imageUrl slug") // 👈 sirf ye fields
+    .sort({ createdAt: -1 });
+
+    res.json({
+      success: true,
+      total: services.length,
+      data: services
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+});
+/* ===============================
+   GET CATEGORY + EXCERPT (Navbar)
+================================ */
+router.get("/navbar-categories", async (req, res) => {
+  try {
+    const { type } = req.query;
+
+    if (!type) {
+      return res.status(400).json({
+        success: false,
+        message: "Type is required",
+      });
+    }
+
+    const categories = await Service.aggregate([
+      { $match: { type } }, // type filter
+      {
+        $group: {
+          _id: "$category",
+          excerpt: { $first: "$excerpt" }, // ek excerpt le lo
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          category: "$_id",
+          excerpt: 1,
+        },
+      },
+      { $sort: { category: 1 } },
+    ]);
+
+    res.json({
+      success: true,
+      total: categories.length,
+      data: categories,
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+});
 export default router;
