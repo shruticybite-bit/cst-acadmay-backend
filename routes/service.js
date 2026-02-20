@@ -166,5 +166,18 @@ router.get("/list", async (req, res) => {
     });
   }
 });
+router.get("/blogs", async (req, res) => {
+  const blogs = await Service.find({ type: "blog" });
+  res.json(blogs);
+});
 
+router.get("/courses", async (req, res) => {
+  const courses = await Service.find({ type: "course" });
+  res.json(courses);
+});
+
+router.get("/articles", async (req, res) => {
+  const articles = await Service.find({ type: "article" });
+  res.json(articles);
+});
 export default router;
