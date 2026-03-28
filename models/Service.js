@@ -5,7 +5,7 @@ const ServiceSchema = new mongoose.Schema(
     type: {
       type: String,
       required: true,
-      enum: ["blog", "course", "article", "workshop"], // optional
+      enum: ["blog", "course", "article", "workshop","case_study"], // optional
     },
 
     title: {

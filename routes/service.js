@@ -170,7 +170,48 @@ router.get("/blogs", async (req, res) => {
   const blogs = await Service.find({ type: "blog" });
   res.json(blogs);
 });
+router.get("/case-studies", async (req, res) => {
+  try {
+    const caseStudies = await Service.find({ type: "case_study" })
+      .sort({ createdAt: -1 });
 
+    res.json({
+      success: true,
+      data: caseStudies,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+});
+router.get("/case-study-detail/:slug", async (req, res) => {
+  try {
+    const caseStudy = await Service.findOne({
+      slug: req.params.slug,
+      type: "case_study", // ✅ important filter
+    });
+
+    if (!caseStudy) {
+      return res.status(404).json({
+        success: false,
+        message: "Case Study not found",
+      });
+    }
+
+    res.json({
+      success: true,
+      data: caseStudy,
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+});
 router.get("/courses", async (req, res) => {
   const courses = await Service.find({ type: "course" });
   res.json(courses);
